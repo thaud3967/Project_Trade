@@ -1,0 +1,7 @@
+{
+    "items": [
+        { "id": 1, "name": "Wood", "price": 100, "desc": "튼튼한 나무." },
+        { "id": 2, "name": "Iron", "price": 200, "desc": "질 좋은 철재." },
+        { "id": 3, "name": "Meat", "price": 1000, "desc": "A++ 한우." }
+    ]
+}

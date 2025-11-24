@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 840a2371ea11e1a43a986e3f0495d98a, type: 3}
+  m_Name: Mine City
+  m_EditorClassIdentifier: Assembly-CSharp::CityData
+  cityName: "\uAD11\uC0B0 \uD56D\uAD6C"
+  specialtyItem: {fileID: 11400000, guid: c3426006056637041b9c61c299281fb7, type: 2}
+  priceMultiplier: 0.8
