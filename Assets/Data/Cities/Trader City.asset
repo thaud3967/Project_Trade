@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 840a2371ea11e1a43a986e3f0495d98a, type: 3}
   m_Name: Trader City
   m_EditorClassIdentifier: Assembly-CSharp::CityData
-  cityName: 
-  specialtyItem: {fileID: 0}
+  cityName: "\uC0C1\uC778 \uD56D\uAD6C"
+  specialtyItem: {fileID: 11400000, guid: 5eaa0e924956f0d4aa753eb52461603c, type: 2}
   priceMultiplier: 0.8

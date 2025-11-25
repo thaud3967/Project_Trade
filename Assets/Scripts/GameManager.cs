@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("플레이어 상태")]
-    public int money = 1000;
+    public int money = 5000;
     // 인벤토리: <아이템데이터, 개수>
     public Dictionary<ItemData, int> inventory = new Dictionary<ItemData, int>();
 
@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
         LoadGameData();
     }
 
-    // 1. JSON 데이터를 읽어서 ScriptableObject 값을 업데이트 (과제 핵심)
+    // JSON 데이터를 읽어서 ScriptableObject 값을 업데이트
     void LoadGameData()
     {
         TextAsset jsonFile = Resources.Load<TextAsset>("items"); // items.json 읽기
@@ -57,7 +57,7 @@ public class GameManager : MonoBehaviour
 
                 if (targetSO != null)
                 {
-                    // JSON에 적힌 값으로 게임 데이터를 덮어씌움 (데이터 주도 설계)
+                    // JSON에 적힌 값으로 게임 데이터를 덮어씌움
                     targetSO.itemName = jsonItem.name;
                     targetSO.basePrice = jsonItem.price;
                     Debug.Log($"[데이터 갱신] {targetSO.itemName} 가격을 {targetSO.basePrice}원으로 설정 완료.");
@@ -70,7 +70,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // 2. 아이템 구매/획득 로직
+    // 아이템 구매/획득 로직
     public void AddItem(ItemData item, int count)
     {
         if (inventory.ContainsKey(item))
@@ -81,18 +81,34 @@ public class GameManager : MonoBehaviour
         {
             inventory.Add(item, count);
         }
-        Debug.Log($"{item.itemName} {count}개 획득. 현재 {inventory[item]}개");
+        Debug.Log($"{item.itemName} {count}개 획득. 현재 총 개수: {inventory[item]}개");
+
+        // 획득 후 UI 갱신 통보
+        NotifyTradeOccurred();
     }
 
-    // 3. 아이템 판매/제거 로직
+    // 아이템 판매/제거 로직
     public bool RemoveItem(ItemData item, int count)
     {
         if (inventory.ContainsKey(item) && inventory[item] >= count)
         {
             inventory[item] -= count;
             if (inventory[item] <= 0) inventory.Remove(item);
+            NotifyTradeOccurred();
             return true; // 제거 성공
         }
         return false; // 개수 부족
     }
+
+    // 거래가 발생할 때마다 UI 갱신을 호출
+    public void NotifyTradeOccurred()
+    {
+        // UIManager가 존재하면 상태를 갱신하도록 명령
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdatePlayerStatus();
+        }
+    }
+
+
 }

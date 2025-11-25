@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Iron
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   id: 2
-  itemName: "\uC18C\uAE08"
-  basePrice: 100
-  icon: {fileID: 0}
+  itemName: Iron
+  basePrice: 200
+  icon: {fileID: 21300000, guid: 7e082cc2cf2a4433d85e388c6bf94234, type: 3}
   description: 
