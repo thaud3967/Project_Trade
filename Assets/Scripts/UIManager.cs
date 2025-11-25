@@ -16,13 +16,15 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
-        // 게임 시작 시 한 번 업데이트
         UpdatePlayerStatus();
     }
 
     // 돈이 바뀔 때마다 호출할 함수
     public void UpdatePlayerStatus()
     {
+        // Null 검사 : GameManager가 존재하지 않으면 여기서 멈춤
+        if (GameManager.Instance == null) return;
+
         // GameManager에서 현재 돈을 가져와 텍스트를 갱신
         goldText.text = $"Gold: {GameManager.Instance.money}G";
     }
