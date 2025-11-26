@@ -2,16 +2,34 @@ using UnityEngine;
 
 public class ShopController : MonoBehaviour
 {
+    //  싱글톤 인스턴스 정의
+    public static ShopController Instance;
+
     public GameObject itemSlotPrefab;
     public Transform contentParent; // 아이템 슬롯이 들어갈 부모 오브젝트
+
+    void Awake()
+    {
+        // 싱글톤 초기화 로직 추가
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            // 이미 인스턴스가 존재하면 현재 오브젝트를 파괴합니다.
+            Destroy(gameObject);
+        }
+    }
 
     void OnEnable()
     {
         // 패널이 활성화될 때마다 상점 목록 새로고침
-        RefreshShop();
+        LoadShopItems(); // RefreshShop 대신 LoadShopItems 호출
     }
 
-    public void RefreshShop()
+    // TradeManager에서 호출하는 함수 이름으로 변경 (LoadShopItems)
+    public void LoadShopItems()
     {
         // 안전장치 : TradeManager가 아직 준비 안 됐으면 중단
         if (TradeManager.Instance == null)
@@ -45,8 +63,16 @@ public class ShopController : MonoBehaviour
             GameObject slotObj = Instantiate(itemSlotPrefab, contentParent);
             ShopItemSlot slot = slotObj.GetComponent<ShopItemSlot>();
 
-            // 슬롯 정보 설정
-            slot.Setup(specialty, price);
+            // 안전장치: ShopItemSlot 컴포넌트가 슬롯에 있는지 확인
+            if (slot != null)
+            {
+                // 슬롯 정보 설정
+                slot.Setup(specialty, price);
+            }
+            else
+            {
+                Debug.LogError("itemSlotPrefab에 ShopItemSlot 컴포넌트가 없습니다!");
+            }
         }
     }
 }

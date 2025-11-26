@@ -1,67 +1,135 @@
 using UnityEngine;
+using TMPro;
 
 public class TradeManager : MonoBehaviour
 {
     public static TradeManager Instance;
 
-    // 현재 플레이어가 있는 도시를 에디터에서 직접 할당합니다.
-    [Header("현재 도시 설정")]
-    // 이 값은 TravelManager의 FinishTravel() 함수에서 갱신됩니다.
-    public CityData currentCity;
+    [Header("UI 연결")]
+    public TextMeshProUGUI currentCityTextUI;
 
-    // 플레이어가 물건을 팔 때 도시가 사주는 기본 마진율 (1.5배)
+    [Header("현재 도시 설정")]
+    // 인스펙터에서 초기 도시 SO를 할당하기 위한 전용 필드 (Inspector에 보임)
+    [SerializeField]
+    private CityData initialCityData;
+
+    private static CityData savedCurrentCity;
+
+    private CityData _currentCity;
+
+    public CityData currentCity
+    {
+        get { return _currentCity; }
+        set
+        {
+            _currentCity = value;
+
+            savedCurrentCity = value;
+            // 도시가 변경될 때마다 UI를 업데이트합니다. (현재 위치 텍스트 갱신)
+            UpdateCityUI();
+
+            // 상점 UI 갱신 활성화: 도시가 변경될 때마다 상점 목록을 다시 불러옵니다.
+            if (ShopController.Instance != null)
+            {
+                ShopController.Instance.LoadShopItems();
+            }
+        }
+    }
+
+    // 플레이어가 물건을 팔 때 도시가 사주는 기본 마진율
     private const float GenericBuybackMultiplier = 1.5f;
 
+    void Start()
+    {
+        // 게임 시작 시 초기 UI 상태 설정
+        UpdateCityUI();
+
+        // 씬이 로드된 직후 상점 목록을 강제로 갱신합니다.
+        if (ShopController.Instance != null)
+        {
+            ShopController.Instance.LoadShopItems();
+        }
+    }
     void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
+        // 게임 시작 시 인스펙터에 할당된 초기 데이터를 currentCity 속성에 대입합니다.
+        if (savedCurrentCity != null)
+        {
+            // 속성을 통해 대입해야 UI 갱신 로직이 실행됨
+            currentCity = savedCurrentCity;
+        }
+        else if (initialCityData != null)
+        {
+            currentCity = initialCityData;
+        }
+
+        // 초기 UI 상태 설정
+        UpdateCityUI();
     }
+
+    private void UpdateCityUI()
+    {
+        if (currentCityTextUI != null && _currentCity != null)
+        {
+            currentCityTextUI.text = $"현재 위치: {_currentCity.cityName}";
+        }
+        else if (currentCityTextUI != null)
+        {
+            currentCityTextUI.text = "현재 위치: 로딩 중...";
+        }
+    }
+
 
     // 플레이어가 살 때의 가격 (도시의 판매 가격)
     public int CalculateBuyPrice(ItemData item)
     {
-        if (currentCity == null) return item.basePrice;
+        if (_currentCity == null) return item.basePrice;
 
         float price = item.basePrice;
 
         // 특산품 할인 적용
-        if (item == currentCity.specialtyItem)
+        if (item == _currentCity.specialtyItem)
         {
-            price *= currentCity.priceMultiplier; // 0.8f 할인
+            price *= _currentCity.priceMultiplier;
         }
 
-        // 랜덤 변동폭 적용 (-Volatility ~ +Volatility)
-        // CityData에 추가한 priceVolatility 변수 사용
-        float randomAdjustment = Random.Range(-currentCity.priceVolatility, currentCity.priceVolatility);
+        // 랜덤 변동폭 적용
+        float randomAdjustment = Random.Range(-_currentCity.priceVolatility, _currentCity.priceVolatility);
         price *= (1f + randomAdjustment);
 
-        // 최종 가격 정수 반환
         return Mathf.RoundToInt(price);
     }
 
     // 플레이어가 팔 때의 가격 (도시의 매입 가격)
     public int CalculateSellPrice(ItemData item)
     {
-        if (currentCity == null) return Mathf.RoundToInt(item.basePrice * GenericBuybackMultiplier);
+        if (_currentCity == null) return Mathf.RoundToInt(item.basePrice * GenericBuybackMultiplier);
 
         float price = item.basePrice;
 
-        // 특산품 헐값 매입 적용 (0.5f) 또는 비싸게 매입 (1.5f)
-        if (item == currentCity.specialtyItem)
+        // 특산품 헐값 매입 또는 비싸게 매입 적용
+        if (item == _currentCity.specialtyItem)
         {
             price *= 0.5f;
         }
         else
         {
-            price *= GenericBuybackMultiplier; // 1.5f
+            price *= GenericBuybackMultiplier;
         }
 
-        // 랜덤 변동폭 적용 (여기도 적용)
-        float randomAdjustment = Random.Range(-currentCity.priceVolatility, currentCity.priceVolatility);
+        // 랜덤 변동폭 적용
+        float randomAdjustment = Random.Range(-_currentCity.priceVolatility, _currentCity.priceVolatility);
         price *= (1f + randomAdjustment);
 
-        // 최종 가격 정수 반환
         return Mathf.RoundToInt(price);
     }
 
@@ -72,10 +140,8 @@ public class TradeManager : MonoBehaviour
         {
             GameManager.Instance.money -= cost;
             GameManager.Instance.AddItem(item, quantity);
-            Debug.Log($"[구매 성공] {(currentCity != null ? currentCity.cityName : "미정 도시")}에서 {item.itemName} {quantity}개 구매 (비용: {cost}G)");
             return true;
         }
-        Debug.Log("[구매 실패] 돈이 부족합니다.");
         return false;
     }
 
@@ -85,13 +151,10 @@ public class TradeManager : MonoBehaviour
 
         if (!GameManager.Instance.RemoveItem(item, quantity))
         {
-            Debug.Log("[판매 실패] 인벤토리에 해당 물건이 부족합니다.");
             return false;
         }
 
         GameManager.Instance.money += revenue;
-
-        Debug.Log($"[판매 성공] {(currentCity != null ? currentCity.cityName : "미정 도시")}에 {item.itemName} {quantity}개 판매 (수익: {revenue}G)");
         return true;
     }
 }

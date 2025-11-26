@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement; 
+using UnityEngine.SceneManagement;
 
 public class TravelManager : MonoBehaviour
 {
@@ -34,7 +34,7 @@ public class TravelManager : MonoBehaviour
         );
     }
 
-    // 플레이어가 이동을 시작하는 함수 (씬 전환 로직 추가 예정)
+    // 플레이어가 이동을 시작하는 함수 (씬 전환 로직 포함)
     public bool StartTravel(CityData destinationCity)
     {
         CityData startCity = TradeManager.Instance.currentCity;
@@ -56,33 +56,26 @@ public class TravelManager : MonoBehaviour
         GameManager.Instance.money -= route.travelCost;
         UIManager.Instance.UpdatePlayerStatus();
 
+        // 항해 씬 컨트롤러에 데이터 전달
         TravelSceneController.targetCity = destinationCity;
         TravelSceneController.daysToTravel = route.travelTimeInDays;
 
+        // SailingScene 로드
         SceneManager.LoadScene(1);
 
-        Debug.Log($"[항해 시작] {startCity.cityName}에서 {destinationCity.cityName}로 이동 시작.");
-
-        // 여기서 SceneManager.LoadScene("SailingScene") 호출
-        // 지금은 임시로 바로 이동 처리.
-
-        FinishTravel(destinationCity, route.travelTimeInDays);
+        Debug.Log($"[항해 시작] {startCity.cityName}에서 {destinationCity.cityName}로 이동 시작. {route.travelTimeInDays}일 소요 예정.");
 
         return true;
     }
 
-    // 도착 처리 및 매니저 업데이트 함수 (항해 씬 종료 시 호출될 예정)
+    // 도착 처리 및 매니저 업데이트 함수 (항해 씬 종료 시 TravelSceneController에 의해 호출됨)
     public void FinishTravel(CityData destinationCity, int travelDays)
     {
-        // 시간 경과 및 유지비 지불 (유지비 로직 추가 예정)
+        // 시간 경과
         currentDay += travelDays;
 
         // 도시 위치 갱신
         TradeManager.Instance.currentCity = destinationCity;
-
-        // 물가 변동 로직 호출 (추가 예정)
-
-        // 씬 전환 (도시 씬 로드)
 
         Debug.Log($"[항해 완료] {destinationCity.cityName}에 도착. 현재 {currentDay}일째.");
     }
