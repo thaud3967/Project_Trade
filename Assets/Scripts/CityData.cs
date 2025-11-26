@@ -8,4 +8,7 @@ public class CityData : ScriptableObject
     [Header("특산품 설정")]
     public ItemData specialtyItem; // 이 도시의 특산품
     public float priceMultiplier = 0.8f; // 특산품은 80% 가격에 팜
+
+    [Header("물가 변동 설정")]
+    public float priceVolatility = 0.2f;
 }

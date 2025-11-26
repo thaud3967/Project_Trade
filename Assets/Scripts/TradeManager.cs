@@ -6,6 +6,7 @@ public class TradeManager : MonoBehaviour
 
     // 현재 플레이어가 있는 도시를 에디터에서 직접 할당합니다.
     [Header("현재 도시 설정")]
+    // 이 값은 TravelManager의 FinishTravel() 함수에서 갱신됩니다.
     public CityData currentCity;
 
     // 플레이어가 물건을 팔 때 도시가 사주는 기본 마진율 (1.5배)
@@ -20,37 +21,50 @@ public class TradeManager : MonoBehaviour
     // 플레이어가 살 때의 가격 (도시의 판매 가격)
     public int CalculateBuyPrice(ItemData item)
     {
-        // Null 검사 : currentCity가 없으면 정가 판매 (안정화)
         if (currentCity == null) return item.basePrice;
 
-        // 특산품일 경우 CityData의 할인율(0.8)을 적용
+        float price = item.basePrice;
+
+        // 특산품 할인 적용
         if (item == currentCity.specialtyItem)
         {
-            return Mathf.RoundToInt(item.basePrice * currentCity.priceMultiplier);
+            price *= currentCity.priceMultiplier; // 0.8f 할인
         }
-        // 특산품이 아니면 정가 판매 (1.0)
-        return item.basePrice;
+
+        // 랜덤 변동폭 적용 (-Volatility ~ +Volatility)
+        // CityData에 추가한 priceVolatility 변수 사용
+        float randomAdjustment = Random.Range(-currentCity.priceVolatility, currentCity.priceVolatility);
+        price *= (1f + randomAdjustment);
+
+        // 최종 가격 정수 반환
+        return Mathf.RoundToInt(price);
     }
 
     // 플레이어가 팔 때의 가격 (도시의 매입 가격)
     public int CalculateSellPrice(ItemData item)
     {
-        // Null 검사 : currentCity가 없으면 일반 물건으로 간주하여 1.5배 매입 (안정화)
         if (currentCity == null) return Mathf.RoundToInt(item.basePrice * GenericBuybackMultiplier);
 
-        // 이 도시의 특산품을 되팔 경우 (50% 헐값에 매입)
+        float price = item.basePrice;
+
+        // 특산품 헐값 매입 적용 (0.5f) 또는 비싸게 매입 (1.5f)
         if (item == currentCity.specialtyItem)
         {
-            return Mathf.RoundToInt(item.basePrice * 0.5f);
+            price *= 0.5f;
         }
         else
         {
-            // 다른 도시의 특산품이므로 비싸게 매입 (1.5배)
-            return Mathf.RoundToInt(item.basePrice * GenericBuybackMultiplier);
+            price *= GenericBuybackMultiplier; // 1.5f
         }
+
+        // 랜덤 변동폭 적용 (여기도 적용)
+        float randomAdjustment = Random.Range(-currentCity.priceVolatility, currentCity.priceVolatility);
+        price *= (1f + randomAdjustment);
+
+        // 최종 가격 정수 반환
+        return Mathf.RoundToInt(price);
     }
 
-    // TryToBuy, TryToSell 함수는 그대로 유지됩니다.
     public bool TryToBuy(ItemData item, int quantity)
     {
         int cost = CalculateBuyPrice(item) * quantity;
