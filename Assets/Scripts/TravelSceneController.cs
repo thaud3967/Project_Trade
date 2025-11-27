@@ -1,57 +1,54 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
-using UnityEngine.SceneManagement;
+using System.Collections.Generic; 
+
+[System.Serializable]
+public struct CitySpawnInfo
+{
+    public CityData city;       
+    public Transform spawnPoint; 
+}
 
 public class TravelSceneController : MonoBehaviour
 {
-    // 이동 시 TradeManager에서 임시로 저장해둔 데이터
+    // 이전 씬에서 받아온 목표 도시 (표시용)
     public static CityData targetCity;
     public static int daysToTravel;
 
-    [Header("UI 연결")]
-    public TextMeshProUGUI dayCounterText;
-    public Slider progressBar;
+    [Header("플레이어 배 연결")]
+    public GameObject playerShip; 
 
-    private int elapsedDays = 0;
-    private float timePerDay = 1.0f; // 1초당 1일이 흐르게 설정
+    [Header("시작 위치 설정")]
+    public List<CitySpawnInfo> spawnPoints; 
+
+    [Header("UI 연결")]
+    public TextMeshProUGUI infoText;
 
     void Start()
     {
-        if (targetCity == null || daysToTravel <= 0)
+        if (targetCity != null && infoText != null)
         {
-            Debug.LogError("여행 데이터가 없습니다. 도시 씬으로 복귀합니다.");
-            // 씬 0번이 도시 씬이라고 가정하고 복귀
-            SceneManager.LoadScene(0);
-            return;
+            infoText.text = $"목표: {targetCity.cityName}로 직접 항해하세요!";
         }
 
-        dayCounterText.text = $"항해 중... {elapsedDays} / {daysToTravel}일";
-        InvokeRepeating("PassDay", timePerDay, timePerDay); // 1초마다 PassDay 함수 호출
-    }
-
-    void PassDay()
-    {
-        elapsedDays++;
-
-        // UI 업데이트
-        dayCounterText.text = $"항해 중... {elapsedDays} / {daysToTravel}일";
-        progressBar.value = (float)elapsedDays / daysToTravel;
-
-        if (elapsedDays >= daysToTravel)
+        // 현재 도시에 맞춰 배 시작 위치 옮기기
+        if (TradeManager.Instance != null && TradeManager.Instance.currentCity != null)
         {
-            CancelInvoke("PassDay"); // 반복 호출 중지
-            FinishTravelSequence();
+            CityData startCity = TradeManager.Instance.currentCity;
+
+            // 리스트를 뒤져서 현재 도시와 일치하는 스폰 위치를 찾음
+            foreach (var info in spawnPoints)
+            {
+                if (info.city == startCity)
+                {
+                    if (playerShip != null && info.spawnPoint != null)
+                    {
+                        playerShip.transform.position = info.spawnPoint.position;
+                        Debug.Log($"[위치 설정] {startCity.cityName} 앞바다에서 시작합니다.");
+                    }
+                    break; 
+                }
+            }
         }
-    }
-
-    void FinishTravelSequence()
-    {
-        // TravelManager에게 최종 도착 처리를 명령합니다.
-        TravelManager.Instance.FinishTravel(targetCity, daysToTravel);
-
-        // 도시 씬(Scene 0번)으로 돌아갑니다.
-        // 현재 도시 씬의 빌드 인덱스가 0번이라고 가정합니다.
-        SceneManager.LoadScene(0);
     }
 }

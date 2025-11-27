@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// JSON 데이터 파싱용
+// JSON 데이터 파싱용 
 [System.Serializable]
 public class JsonItemData
 {
@@ -28,9 +28,15 @@ public class GameManager : MonoBehaviour
     [Header("데이터베이스")]
     public List<ItemData> allItemSOs;
 
+    // 게임 클리어 변수 및 조건 
+    [Header("게임 클리어")]
+    public int winMoneyAmount = 50000; // 목표 금액
+    private bool hasWon = false; // 클리어 상태 (한 번 달성하면 유지)
+
+
     void Awake()
     {
-        // 싱글톤 패턴 구현 및 DDOL
+        // 싱글톤 패턴 구현 및 DDOL (기존 코드)
         if (Instance == null)
         {
             Instance = this;
@@ -107,6 +113,37 @@ public class GameManager : MonoBehaviour
         if (UIManager.Instance != null)
         {
             UIManager.Instance.UpdatePlayerStatus();
+        }
+    }
+
+    //  money 변경 처리 함수 
+    public bool ChangeMoney(int amount)
+    {
+        // money 부족 시 거래 실패 방지
+        if (money + amount < 0)
+        {
+            Debug.LogWarning("Gold가 부족하여 거래 실패!");
+            return false;
+        }
+
+        money += amount;
+
+        // money가 변경될 때마다 클리어 조건을 검사합니다. 
+        CheckWinCondition();
+
+        NotifyTradeOccurred();
+        return true;
+    }
+
+    // 클리어 조건 검증 함수 
+    public void CheckWinCondition()
+    {
+        if (hasWon) return; // 이미 클리어했으면 무시
+
+        if (money >= winMoneyAmount)
+        {
+            hasWon = true;
+            Debug.Log($" 게임 클리어! {winMoneyAmount} money 달성! ");
         }
     }
 }

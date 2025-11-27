@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: Starter City
   m_EditorClassIdentifier: Assembly-CSharp::CityData
   cityName: "\uCD08\uC2EC\uC790 \uD56D\uAD6C"
+  cityBackground: {fileID: -654162921788278097, guid: 819a617c6da6b3048a27bba12581ec9f, type: 3}
   specialtyItem: {fileID: 11400000, guid: 770ed17ff701a9747a903b492e98cca7, type: 2}
   priceMultiplier: 0.8
+  priceVolatility: 0.2

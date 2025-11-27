@@ -1,12 +1,14 @@
-using UnityEngine;
+using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class TradeManager : MonoBehaviour
 {
     public static TradeManager Instance;
-
     [Header("UI 연결")]
     public TextMeshProUGUI currentCityTextUI;
+    public Image backgroundImage;
 
     [Header("현재 도시 설정")]
     // 인스펙터에서 초기 도시 SO를 할당하기 위한 전용 필드 (Inspector에 보임)
@@ -55,6 +57,7 @@ public class TradeManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -81,6 +84,11 @@ public class TradeManager : MonoBehaviour
         if (currentCityTextUI != null && _currentCity != null)
         {
             currentCityTextUI.text = $"현재 위치: {_currentCity.cityName}";
+
+            if (backgroundImage != null && _currentCity.cityBackground != null)
+            {
+                backgroundImage.sprite = _currentCity.cityBackground;
+            }
         }
         else if (currentCityTextUI != null)
         {
@@ -136,9 +144,10 @@ public class TradeManager : MonoBehaviour
     public bool TryToBuy(ItemData item, int quantity)
     {
         int cost = CalculateBuyPrice(item) * quantity;
-        if (GameManager.Instance.money >= cost)
+
+        // GameManager의 money를 변경하는 함수를 호출하고 돈이 충분한지 확인합니다.
+        if (GameManager.Instance.ChangeMoney(-cost))
         {
-            GameManager.Instance.money -= cost;
             GameManager.Instance.AddItem(item, quantity);
             return true;
         }
@@ -154,7 +163,9 @@ public class TradeManager : MonoBehaviour
             return false;
         }
 
-        GameManager.Instance.money += revenue;
+        // GameManager의 money를 변경하는 함수를 호출합니다.
+        GameManager.Instance.ChangeMoney(revenue);
         return true;
     }
+
 }

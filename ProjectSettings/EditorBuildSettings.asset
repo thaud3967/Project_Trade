@@ -15,5 +15,5 @@ EditorBuildSettings:
     path: Assets/Scenes/SailingScene.unity
     guid: 15c4b55a582c6924fb0b1469ca8f23e8
   m_configObjects:
-    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: c4dff009cfcf25045aebdcc1e7b1bff7, type: 3}
   m_UseUCBPForAssetBundles: 0
